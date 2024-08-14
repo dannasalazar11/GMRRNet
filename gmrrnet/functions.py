@@ -271,8 +271,6 @@ def plot_training_history(history):
     plt.grid()
     plt.show()
 
-# Gaussian kernel layer
-
 class GaussianKernelLayer(Layer):
     """
     Capa personalizada de Keras que aplica un kernel Gaussiano sobre las entradas.
@@ -357,8 +355,6 @@ class GaussianKernelLayer(Layer):
         
         return gaussian_kernel
 
-#Inception block
-
 def inception_block(x, filters, sigmas):
     """
     Construye un bloque de Inception personalizado que incluye capas de convolución y capas de kernel Gaussiano.
@@ -429,8 +425,30 @@ def inception_block(x, filters, sigmas):
 
     return branch_k1, branch_k2, branch_k3, output
 
-# Renyi entropy
+class RenyiMutualInformation(Loss):
+    def __init__(self, C, **kwargs):
+        self.C = C
+        super().__init__(**kwargs)
 
+    def call(self, y_true, y_pred):
+        """
+        y_true: 
+        y_pred: N x (F+1) las F entropías marginales y la entropía conjunta
+        """
+        
+        F = y_pred.shape[1]-1
+        entropy,  joint_entropy = tf.split(y_pred, [F,1], axis=-1)
+        
+        #Cast todo
+        entropy = tf.cast(entropy, tf.float64)
+        joint_entropy = tf.cast(joint_entropy, tf.float64)
+        log_C = tf.math.log(tf.cast(self.C, tf.float64))
+        
+        mutual_information = tf.math.abs((tf.expand_dims(tf.reduce_sum(entropy, axis=-1), axis=-1) - joint_entropy)) / (F * log_C) # normalizado
+
+
+        return mutual_information
+    
 def renyi_entropy(K, alpha=2):
     """
     Calcula la entropía de Rényi para un tensor de entrada.
@@ -507,9 +525,7 @@ def renyi_entropy(K, alpha=2):
         e, _ = tf.linalg.eigh(X)
         # Calcula la entropía de Renyi
         return (tf.math.log(tf.reduce_sum(tf.math.real(tf.math.pow(e, alpha)), axis=-1)) / (1 - alpha))
-
-# Joint renyi entropy
-
+    
 def joint_renyi_entropy(K, alpha):
     """
     Calcula la entropía conjunta de Rényi para un tensor de entrada.
@@ -585,8 +601,6 @@ def joint_renyi_entropy(K, alpha):
     joint_entropy = renyi_entropy(argument, alpha=alpha)
     
     return joint_entropy
-
-# mutual information
 
 class RenyiMutualInformation(Loss):
     def __init__(self, C, **kwargs):
@@ -671,9 +685,7 @@ class RenyiMutualInformation(Loss):
         ) / (F * log_C)  # Normalización
 
         return mutual_information
-
-# normalized cross-entropy
-
+    
 class NormalizedBinaryCrossentropy(Loss):
     def __init__(self, **kwargs):
         """
@@ -757,8 +769,6 @@ class NormalizedBinaryCrossentropy(Loss):
         
         return cce_norm
     
-# GMRRNet
-
 def GMRRNet(nb_classes=2, Chans=64, Samples=320, 
                           kernLength=64, norm_rate=0.25, alpha=2): 
     """
@@ -820,7 +830,7 @@ def GMRRNet(nb_classes=2, Chans=64, Samples=320,
     Ejemplo de Uso:
     ---------------
     ```python
-    model = GMRRNet(nb_classes=2, Chans=64, Samples=320, kernLength=64, norm_rate=0.25, alpha=2)
+    model = KernelConvInceptionMI(nb_classes=2, Chans=64, Samples=320, kernLength=64, norm_rate=0.25, alpha=2)
     model.summary()
     ```
     
@@ -889,4 +899,3 @@ def GMRRNet(nb_classes=2, Chans=64, Samples=320,
                   metrics=[['binary_accuracy'], [None]])
     
     return model
-
