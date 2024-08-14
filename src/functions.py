@@ -20,7 +20,7 @@ from sklearn.model_selection import KFold
 from keras_tuner import HyperModel, RandomSearch, Objective
 from IPython.display import FileLink
 
-def load_GIGA(db: GIGA_MI_ME,
+def load_GIGA(db,
               sbj: int,
               eeg_ch_names: Sequence[str],
               fs: float, 
