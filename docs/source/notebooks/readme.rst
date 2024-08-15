@@ -7,3 +7,6 @@ esta red es espectacular
 
     import numpy as np
 
+.. code:: ipython3
+
+    import tensorflow
