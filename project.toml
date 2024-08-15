@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gmrrnet"
+version = "0.1.0"
+description = "Implementación del modelo GMRRNet"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "BSD-2-Clause" }
+authors = [
+    { name = "Danna Salazar", email = "dsalazard@unal.edu.co" }
+]
+maintainers = [
+    { name = "Danna Salazar", email = "dsalazard@unal.edu.co" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "tensorflow",
+    "scipy",
+    "numpy",
+]
+
+[project.urls]
+"Repository" = "https://github.com/dannasalazar11/GMRRNet"
+
+[project.optional-dependencies]
+dev = [
+    "mne",
+    "matplotlib",
+    "IPython",
+    "pandas",
+    "scikit-learn",
+    ]

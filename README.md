@@ -1,1 +1,1 @@
-# GMRRNet
+# gmrrnet
