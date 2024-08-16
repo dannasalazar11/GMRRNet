@@ -1,7 +1,3 @@
-from typing import Optional, Sequence, Tuple
-
-import numpy as np
-
 import tensorflow as tf
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import (
@@ -21,57 +17,49 @@ from tensorflow.keras.losses import Loss
 
 def renyi_entropy(K, alpha=2):
     """
-    Calcula la entropía de Rényi para un tensor de entrada.
+    Calculates the Rényi entropy for an input tensor.
 
-    Parámetros:
+    Parameters:
     -----------
     K : Tensor
-        Un tensor de entrada de forma `(N, F, C, C)`, donde:
-        - N: Número de muestras en el lote.
-        - F: Número de filtros o características.
-        - C: Número de canales o dimensiones de las matrices cuadradas dentro del tensor.
+        An input tensor of shape `(N, F, C, C)`, where:
+        - N: Number of samples in the batch.
+        - F: Number of filters or features.
+        - C: Number of channels or dimensions of the square matrices within the tensor.
 
-    alpha : float, opcional
-        El parámetro de entropía de Rényi. Por defecto es 2.0.
-        - Cuando `alpha=2`, se aplica una optimización específica para este valor.
+    alpha : float, optional
+        The Rényi entropy parameter. Default is 2.0.
+        - When `alpha=2`, a specific optimization is applied for this value.
 
-    Retorna:
+    Returns:
     --------
     Tensor
-        Un tensor de salida de forma `(N, F)`, que contiene la entropía de Rényi calculada para cada muestra y filtro.
+        An output tensor of shape `(N, F)`, which contains the calculated Rényi entropy for each sample and filter.
 
-    Descripción:
+    Description:
     ------------
-    La entropía de Rényi es una generalización de la entropía de Shannon, que depende de un parámetro `alpha`. Esta función
-    calcula la entropía de Rényi para cada una de las matrices cuadradas en el tensor `K` normalizado.
+    Rényi entropy is a generalization of Shannon entropy, which depends on the parameter `alpha`. This function calculates the Rényi entropy for each of the normalized square matrices in the tensor `K`.
 
-    Pasos:
+    Steps:
     ------
-    1. **Normalización del Kernel**:
-        - Se normaliza el tensor `K` dividiéndolo por el producto de los elementos diagonales de sus matrices cuadradas.
-        - Esta normalización se realiza para estabilizar el cálculo de la entropía.
+    1. **Kernel Normalization**:
+        - The tensor `K` is normalized by dividing it by the product of the diagonal elements of its square matrices.
+        - This normalization is performed to stabilize the entropy calculation.
 
-    2. **Cálculo de la Entropía**:
-        - Si `alpha=2`, se utiliza una optimización que calcula la traza del producto matricial de `X` consigo mismo.
-        - Para otros valores de `alpha`, se calculan los autovalores de `X` y se utiliza la fórmula general para la entropía de Rényi.
+    2. **Entropy Calculation**:
+        - If `alpha=2`, an optimization is used that computes the trace of the matrix product of `X` with itself.
+        - For other values of `alpha`, the eigenvalues of `X` are computed, and the general formula for Rényi entropy is applied.
 
-    Ejemplo de Uso:
-    ---------------
+    Usage Example:
+    --------------
     ```python
-    # Crear un tensor de ejemplo con la forma (N, F, C, C)
+    # Create a sample tensor with shape (N, F, C, C)
     K = tf.random.normal((32, 10, 64, 64))
 
-    # Calcular la entropía de Rényi con alpha = 2
+    # Calculate the Rényi entropy with alpha = 2
     entropy = renyi_entropy(K, alpha=2)
-    print(entropy.shape)  # Salida: (32, 10)
-    ```
+    print(entropy.shape)  # Output: (32, 10)
 
-    Notas:
-    ------
-    - La entropía de Rényi con `alpha=2` es especialmente útil en contextos donde se desea penalizar grandes concentraciones de probabilidad,
-      debido a que esta métrica es más sensible a distribuciones con pocos eventos de alta probabilidad.
-    - La función retorna la entropía negativa, lo que es estándar en la teoría de la información, ya que una mayor concentración
-      de probabilidad corresponde a una menor entropía.
     """
 
     # Obtener el número de canales
@@ -103,59 +91,44 @@ def renyi_entropy(K, alpha=2):
 
 def joint_renyi_entropy(K, alpha):
     """
-    Calcula la entropía conjunta de Rényi para un tensor de entrada.
+    Calculates the joint Rényi entropy for an input tensor.
 
-    Parámetros:
+    Parameters:
     -----------
     K : Tensor
-        Un tensor de entrada de forma `(N, F, C, C)`, donde:
-        - N: Número de muestras en el lote.
-        - F: Número de filtros o características.
-        - C: Número de canales o dimensiones de las matrices cuadradas dentro del tensor.
+        An input tensor of shape `(N, F, C, C)`, where:
+        - N: Number of samples in the batch.
+        - F: Number of filters or features.
+        - C: Number of channels or dimensions of the square matrices within the tensor.
 
     alpha : float
-        El parámetro de entropía de Rényi. Controla la sensibilidad de la métrica a diferentes distribuciones de probabilidad.
+        The Rényi entropy parameter. Controls the sensitivity of the metric to different probability distributions.
 
-    Retorna:
+    Returns:
     --------
     Tensor
-        Un tensor de salida de forma `(N, 1)`, que contiene la entropía conjunta de Rényi calculada para cada muestra.
+        An output tensor of shape `(N, 1)`, which contains the calculated joint Rényi entropy for each sample.
 
-    Descripción:
+    Description:
     ------------
-    Esta función calcula la entropía conjunta de Rényi, la cual mide la cantidad de incertidumbre en un sistema considerando múltiples variables conjuntamente. La entropía conjunta es útil para evaluar la dependencia o interrelación entre variables.
+    This function calculates the joint Rényi entropy, which measures the amount of uncertainty in a system by considering multiple variables together. Joint entropy is useful for evaluating the dependency or interrelation between variables.
 
-    Pasos:
+    Steps:
     ------
-    1. **Producto de los Términos del Tensor**:
-        - Se realiza un producto a lo largo de la dimensión `F` del tensor `K`, reduciendo así el tensor de `(N, F, C, C)` a `(N, C, C)`.
+    1. **Product of Tensor Terms**:
+        - A product is performed along the `F` dimension of the tensor `K`, reducing the tensor from `(N, F, C, C)` to `(N, C, C)`.
 
-    2. **Cálculo de la Traza**:
-        - Se calcula la traza del tensor resultante, que es la suma de los elementos en la diagonal principal de las matrices cuadradas en `(N, C, C)`.
-        - La traza se expande y se repite para hacerla compatible con la dimensionalidad del tensor `K`.
+    2. **Trace Calculation**:
+        - The trace of the resulting tensor is calculated, which is the sum of the elements on the main diagonal of the square matrices in `(N, C, C)`.
+        - The trace is expanded and repeated to make it compatible with the dimensionality of tensor `K`.
 
-    3. **Normalización**:
-        - Se normaliza el producto obtenido en el primer paso dividiéndolo por la traza expandida, lo que estabiliza el cálculo de la entropía.
+    3. **Normalization**:
+        - The product obtained in the first step is normalized by dividing it by the expanded trace, stabilizing the entropy calculation.
 
-    4. **Cálculo de la Entropía Conjunta**:
-        - Se pasa el tensor normalizado a la función `renyi_entropy`, que calcula la entropía de Rényi considerando la interrelación entre las variables.
-
-    Ejemplo de Uso:
-    ---------------
-    ```python
-    # Crear un tensor de ejemplo con la forma (N, F, C, C)
-    K = tf.random.normal((32, 10, 64, 64))
-
-    # Calcular la entropía conjunta de Rényi con alpha = 2
-    joint_entropy = joint_renyi_entropy(K, alpha=2)
-    print(joint_entropy.shape)  # Salida: (32, 1)
-    ```
-
-    Notas:
-    ------
-    - La entropía conjunta de Rényi es particularmente útil cuando se quiere evaluar la cantidad de información compartida entre múltiples variables.
-    - Al utilizar diferentes valores de `alpha`, se puede ajustar la sensibilidad de la métrica para enfatizar distribuciones de probabilidad más concentradas o más dispersas.
+    4. **Joint Entropy Calculation**:
+        - The normalized tensor is passed to the `renyi_entropy` function, which calculates the Rényi entropy while considering the interrelation between the variables.
     """
+
 
     # Obtener el número de canales
     C = K.shape[-1]
@@ -182,53 +155,54 @@ def joint_renyi_entropy(K, alpha):
 
 def inception_block(x, filters, sigmas):
     """
-    Construye un bloque de Inception personalizado que incluye capas de convolución y capas de kernel Gaussiano.
+    Builds a custom Inception block that includes convolution layers and Gaussian kernel layers.
 
-    Este bloque Inception crea tres ramas, cada una aplicando un kernel Gaussiano seguido de una capa de convolución 2D.
-    Finalmente, las salidas de estas ramas se concatenan a lo largo del eje de los canales.
+    This Inception block creates three branches, each applying a Gaussian kernel followed by a 2D convolution layer.
+    Finally, the outputs of these branches are concatenated along the channel axis.
 
-    Parámetros:
+    Parameters:
     -----------
     x : Tensor
-        Tensor de entrada con forma `(N, C, T, F)` donde:
-        - N: Número de muestras en el lote.
-        - C: Número de canales o características.
-        - T: Número de pasos temporales.
-        - F: Número de filtros o características adicionales.
+        Input tensor of shape `(N, C, T, F)` where:
+        - N: Number of samples in the batch.
+        - C: Number of channels or features.
+        - T: Number of time steps.
+        - F: Number of additional filters or features.
 
     filters : list of int
-        Lista que contiene el número de filtros para cada rama del bloque Inception. Debe ser una lista de tres enteros `[f1, f2, f3]`
-        donde `f1`, `f2`, y `f3` son el número de filtros para las ramas 1, 2 y 3 respectivamente.
+        List containing the number of filters for each branch of the Inception block. It should be a list of three integers `[f1, f2, f3]`
+        where `f1`, `f2`, and `f3` are the number of filters for branches 1, 2, and 3, respectively.
 
     sigmas : list of float
-        Lista que contiene los valores de `sigma` para cada capa `GaussianKernelLayer` en las ramas del bloque Inception. Debe ser una lista
-        de tres valores `[sigma1, sigma2, sigma3]` donde `sigma1`, `sigma2`, y `sigma3` corresponden a las ramas 1, 2 y 3 respectivamente.
+        List containing the `sigma` values for each `GaussianKernelLayer` in the branches of the Inception block. It should be a list
+        of three values `[sigma1, sigma2, sigma3]` where `sigma1`, `sigma2`, and `sigma3` correspond to branches 1, 2, and 3, respectively.
 
-    Retorna:
+    Returns:
     --------
     branch_k1, branch_k2, branch_k3 : Tensors
-        Las salidas de las capas `GaussianKernelLayer` en las tres ramas, con forma `(N, C, C, F)`.
+        The outputs of the `GaussianKernelLayer` in the three branches, with shape `(N, C, C, F)`.
 
     output : Tensor
-        La salida concatenada de las tres ramas después de la capa de convolución, con forma `(N, C, T, f1 + f2 + f3)`.
+        The concatenated output of the three branches after the convolution layer, with shape `(N, C, T, f1 + f2 + f3)`.
 
-    Descripción:
+    Description:
     ------------
-    Este bloque Inception se compone de las siguientes partes:
-    1. **Rama 1**:
-        - Aplica una capa `GaussianKernelLayer` con `sigma=sigmas[0]` sobre la entrada `x`.
-        - Aplica una capa de convolución 2D con `f1` filtros de tamaño `(3, 3)` y activación `ReLU`.
+    This Inception block consists of the following parts:
+    1. **Branch 1**:
+        - Applies a `GaussianKernelLayer` with `sigma=sigmas[0]` to the input `x`.
+        - Applies a 2D convolution layer with `f1` filters of size `(3, 3)` and `ReLU` activation.
 
-    2. **Rama 2**:
-        - Aplica una capa `GaussianKernelLayer` con `sigma=sigmas[1]` sobre la entrada `x`.
-        - Aplica una capa de convolución 2D con `f2` filtros de tamaño `(3, 3)` y activación `ReLU`.
+    2. **Branch 2**:
+        - Applies a `GaussianKernelLayer` with `sigma=sigmas[1]` to the input `x`.
+        - Applies a 2D convolution layer with `f2` filters of size `(3, 3)` and `ReLU` activation.
 
-    3. **Rama 3**:
-        - Aplica una capa `GaussianKernelLayer` con `sigma=sigmas[2]` sobre la entrada `x`.
-        - Aplica una capa de convolución 2D con `f3` filtros de tamaño `(3, 3)` y activación `ReLU`.
+    3. **Branch 3**:
+        - Applies a `GaussianKernelLayer` with `sigma=sigmas[2]` to the input `x`.
+        - Applies a 2D convolution layer with `f3` filters of size `(3, 3)` and `ReLU` activation.
 
-    Finalmente, las salidas de las tres ramas se concatenan a lo largo del eje de los canales.
+    Finally, the outputs of the three branches are concatenated along the channel axis.
     """
+
 
     # Filtros
     f1, f2, f3 = filters
@@ -265,39 +239,39 @@ def inception_block(x, filters, sigmas):
 
 class GaussianKernelLayer(Layer):
     """
-    Capa personalizada de Keras que aplica un kernel Gaussiano sobre las entradas.
+    Custom Keras layer that applies a Gaussian kernel to the inputs.
 
-    Esta capa calcula la distancia euclidiana al cuadrado entre pares de puntos y luego aplica una función kernel Gaussiana
-    para transformar esas distancias en similitudes, lo que es útil en el procesamiento de señales como EEG o en la construcción
-    de redes neuronales con funciones de kernel.
+    This layer calculates the squared Euclidean distance between pairs of points and then applies a Gaussian kernel function
+    to transform those distances into similarities, which is useful in signal processing such as EEG or in constructing neural networks with kernel functions.
 
-    Parámetros:
+    Parameters:
     -----------
-    sigma : float, opcional (por defecto=1.0)
-        Desviación estándar de la función kernel Gaussiana. Controla el alcance o "spread" de la Gaussiana.
+    sigma : float, optional (default=1.0)
+        Standard deviation of the Gaussian kernel function. Controls the range or "spread" of the Gaussian.
 
-    Métodos:
+    Methods:
     --------
     build(input_shape):
-        Método de construcción que inicializa los componentes internos de la capa basados en la forma de la entrada.
+        Build method that initializes the internal components of the layer based on the shape of the input.
 
     call(inputs):
-        Método que aplica la transformación de la capa a las entradas.
+        Method that applies the layer's transformation to the inputs.
 
-        Parámetros:
+        Parameters:
         -----------
         inputs : Tensor
-            Tensor de entrada con la forma `(N, C, T, F)` donde:
-            - N: Número de muestras en el lote.
-            - C: Número de canales o características.
-            - T: Número de pasos temporales.
-            - F: Número de filtros.
+            Input tensor with shape `(N, C, T, F)` where:
+            - N: Number of samples in the batch.
+            - C: Number of channels or features.
+            - T: Number of time steps.
+            - F: Number of filters.
 
-        Retorna:
+        Returns:
         --------
         gaussian_kernel : Tensor
-            Tensor con la misma forma que el tensor de entrada, pero donde cada entrada ha sido transformada por el kernel Gaussiano.
+            Tensor with the same shape as the input tensor, where each entry has been transformed by the Gaussian kernel.
     """
+
 
     def __init__(self, sigma=1.0, **kwargs):
         super(GaussianKernelLayer, self).__init__(**kwargs)
@@ -305,29 +279,31 @@ class GaussianKernelLayer(Layer):
 
     def build(self, input_shape):
         """
-        Inicializa la capa. Este método es llamado una sola vez y se utiliza para construir las variables de la capa.
+                Initializes the layer. This method is called once and is used to build the layer's variables.
 
-        Parámetros:
-        -----------
-        input_shape : tuple
-            Forma de la entrada esperada por la capa.
+                Parameters:
+                -----------
+                input_shape : tuple
+                    The expected shape of the input to the layer.
         """
+
         super(GaussianKernelLayer, self).build(input_shape)
 
     def call(self, inputs):
         """
-        Aplica la transformación del kernel Gaussiano a los datos de entrada.
+                Applies the Gaussian kernel transformation to the input data.
 
-        Parámetros:
-        -----------
-        inputs : Tensor
-            Tensor de entrada de forma `(N, C, T, F)`.
+                Parameters:
+                -----------
+                inputs : Tensor
+                    Input tensor of shape `(N, C, T, F)`.
 
-        Retorna:
-        --------
-        gaussian_kernel : Tensor
-            Tensor de salida donde se ha aplicado el kernel Gaussiano, con forma `(N, C, C, F)`.
+                Returns:
+                --------
+                gaussian_kernel : Tensor
+                    Output tensor where the Gaussian kernel has been applied, with shape `(N, C, C, F)`.
         """
+
         # Descomposición de la forma del tensor de entrada
         N, C, T, F = (
             tf.shape(inputs)[0],
@@ -376,9 +352,10 @@ class RenyiMutualInformation(Loss):
 
     def call(self, y_true, y_pred):
         """
-        y_true:
-        y_pred: N x (F+1) las F entropías marginales y la entropía conjunta
+                y_true:
+                y_pred: N x (F+1) where F are the marginal entropies and the last value is the joint entropy.
         """
+
 
         F = y_pred.shape[1] - 1
         entropy, joint_entropy = tf.split(y_pred, [F, 1], axis=-1)
@@ -403,68 +380,70 @@ class RenyiMutualInformation(Loss):
 class RenyiMutualInformation(Loss):
     def __init__(self, C, **kwargs):
         """
-        Inicializa la clase RenyiMutualInformation.
+        Initializes the RenyiMutualInformation class.
 
-        Parámetros:
+        Parameters:
         -----------
-        C : int o float
-            El número de canales (dimensión C) utilizado para la normalización en el cálculo de la información mutua.
+        C : int or float
+            The number of channels (dimension C) used for normalization in the mutual information calculation.
         kwargs : dict
-            Otros argumentos opcionales que se pasan a la clase base `Loss`.
+            Other optional arguments passed to the base `Loss` class.
         """
+
         self.C = C
         super().__init__(**kwargs)
 
     def call(self, y_true, y_pred):
         """
-        Calcula la pérdida basada en la información mutua de Rényi.
+        Computes the loss based on Rényi mutual information.
 
-        Parámetros:
+        Parameters:
         -----------
         y_true : Tensor
-            Etiquetas verdaderas, no se utilizan en este cálculo de pérdida, pero se requieren para cumplir con la API de Keras.
+            True labels, not used in this loss calculation but required to comply with the Keras API.
 
         y_pred : Tensor
-            Tensor de predicciones de forma `(N, F+1)`, donde:
-            - N: Número de muestras en el lote.
-            - F: Número de entropías marginales.
-            - F+1: La última columna contiene la entropía conjunta.
+            Prediction tensor of shape `(N, F+1)`, where:
+            - N: Number of samples in the batch.
+            - F: Number of marginal entropies.
+            - F+1: The last column contains the joint entropy.
 
-        Retorna:
+        Returns:
         --------
         Tensor
-            Un tensor de pérdida de forma `(N, 1)`, que contiene la información mutua de Rényi calculada para cada muestra.
+            A loss tensor of shape `(N, 1)`, which contains the calculated Rényi mutual information for each sample.
 
-        Descripción:
+        Description:
         ------------
-        Esta clase implementa una pérdida basada en la información mutua de Rényi, que es una medida de la cantidad de información que comparten dos o más variables. En este caso, se utiliza para evaluar qué tan bien las predicciones del modelo reflejan la dependencia entre diferentes características.
+        This class implements a loss based on Rényi mutual information, which is a measure of the amount of information shared between two or more variables. In this case, it is used to evaluate how well the model predictions reflect the dependency between different features.
 
-        Pasos:
+        Steps:
         ------
-        1. **Separación de Entropías**:
-            - Se divide el tensor `y_pred` en dos partes: `entropy` que contiene las entropías marginales de cada característica, y `joint_entropy` que contiene la entropía conjunta.
+        1. **Separation of Entropies**:
+            - The `y_pred` tensor is split into two parts: `entropy` containing the marginal entropies of each feature, and `joint_entropy` containing the joint entropy.
 
-        2. **Casteo de Tipos**:
-            - Se asegura de que tanto las entropías marginales como la entropía conjunta estén en formato `tf.float64` para una mayor precisión en los cálculos.
+        2. **Type Casting**:
+            - Ensures that both the marginal entropies and joint entropy are in `tf.float64` format for higher precision in calculations.
 
-        3. **Cálculo del Logaritmo de `C`**:
-            - Se calcula el logaritmo natural de `C` (`log_C`), que es un valor constante utilizado en la normalización del cálculo.
+        3. **Calculation of the Logarithm of `C`**:
+            - The natural logarithm of `C` (`log_C`) is computed, which is a constant value used in normalizing the calculation.
 
-        4. **Cálculo de la Información Mutua de Rényi**:
-            - Se calcula la suma de las entropías marginales, se resta la entropía conjunta y se normaliza por `F * log_C` para obtener la información mutua de Rényi normalizada.
+        4. **Calculation of Rényi Mutual Information**:
+            - The sum of the marginal entropies is computed, the joint entropy is subtracted, and the result is normalized by `F * log_C` to obtain the normalized Rényi mutual information.
 
-        Ejemplo de Uso:
+        Usage Example:
         ---------------
         ```python
-        # Definir la pérdida en el modelo
+        # Define the loss in the model
         model.compile(optimizer='adam', loss=[NormalizedBinaryCrossentropy(), RenyiMutualInformation(C=64)], loss_weights=[0.8, 0.2])
         ```
 
-        Notas:
+        Notes:
         ------
-        - Esta clase está diseñada para trabajar en conjunto con un modelo que genere tanto las entropías marginales como la entropía conjunta como salidas.
-        - La información mutua de Rényi es útil en tareas donde es importante evaluar la cantidad de información compartida entre diferentes características o señales.
+        - This class is designed to work in conjunction with a model that outputs both the marginal entropies and the joint entropy.
+        - Rényi mutual information is useful in tasks where it is important to evaluate the amount of shared information between different features or signals.
         """
+
 
         # Número de entropías marginales
         F = y_pred.shape[1] - 1
@@ -493,64 +472,54 @@ class RenyiMutualInformation(Loss):
 class NormalizedBinaryCrossentropy(Loss):
     def __init__(self, **kwargs):
         """
-        Inicializa la clase NormalizedBinaryCrossentropy.
+                Initializes the NormalizedBinaryCrossentropy class.
 
-        Parámetros:
-        -----------
-        kwargs : dict
-            Argumentos opcionales que se pasan a la clase base `Loss`.
+                Parameters:
+                -----------
+                kwargs : dict
+                    Optional arguments passed to the base `Loss` class.
         """
+ 
         super().__init__(**kwargs)
 
     def call(self, y_true, y_pred):
         """
-        Calcula la pérdida de entropía cruzada binaria normalizada.
+        Computes the normalized binary cross-entropy loss.
 
-        Parámetros:
+        Parameters:
         -----------
         y_true : Tensor
-            Tensor de etiquetas verdaderas de forma `(N, 2)`, donde:
-            - N: Número de muestras en el lote.
-            - 2: Corresponde a las clases binarias (0 o 1).
+            Tensor of true labels with shape `(N, 2)`, where:
+            - N: Number of samples in the batch.
+            - 2: Corresponds to binary classes (0 or 1).
 
         y_pred : Tensor
-            Tensor de predicciones de forma `(N, 2)`, donde:
-            - N: Número de muestras en el lote.
-            - 2: Predicciones de probabilidad para las dos clases binarias.
+            Tensor of predictions with shape `(N, 2)`, where:
+            - N: Number of samples in the batch.
+            - 2: Probability predictions for the two binary classes.
 
-        Retorna:
+        Returns:
         --------
         Tensor
-            Un tensor de pérdida de forma `(N,)`, que contiene la pérdida de entropía cruzada binaria normalizada para cada muestra.
+            A loss tensor with shape `(N,)`, containing the normalized binary cross-entropy loss for each sample.
 
-        Descripción:
+        Description:
         ------------
-        Esta clase implementa una versión normalizada de la pérdida de entropía cruzada binaria. La entropía cruzada binaria es una medida de la disimilitud entre dos distribuciones de probabilidad, a menudo utilizada como una función de pérdida en problemas de clasificación binaria.
+        This class implements a normalized version of the binary cross-entropy loss. Binary cross-entropy is a measure of dissimilarity between two probability distributions, commonly used as a loss function in binary classification problems.
 
-        En esta implementación, la pérdida de entropía cruzada se normaliza utilizando las pérdidas teóricas asociadas a las etiquetas `[1, 0]` y `[0, 1]`, que representan las dos clases posibles. La normalización tiene como objetivo ajustar la pérdida para que sea más robusta frente a distribuciones de probabilidad sesgadas.
+        In this implementation, the binary cross-entropy loss is normalized using the theoretical losses associated with the labels `[1, 0]` and `[0, 1]`, which represent the two possible classes. The normalization aims to adjust the loss to be more robust against skewed probability distributions.
 
-        Pasos:
+        Steps:
         ------
-        1. **Cálculo de la Entropía Cruzada Binaria**:
-            - Se calcula la pérdida de entropía cruzada binaria estándar entre `y_true` y `y_pred`.
+        1. **Calculation of Binary Cross-Entropy Loss**:
+            - Computes the standard binary cross-entropy loss between `y_true` and `y_pred`.
 
-        2. **Cálculo de la Pérdida para Etiquetas Teóricas**:
-            - Se generan las pérdidas teóricas `cce_left` y `cce_right` utilizando las etiquetas `[1.0, 0.0]` y `[0.0, 1.0]` respectivamente.
+        2. **Calculation of Theoretical Losses**:
+            - Generates the theoretical losses `cce_left` and `cce_right` using the labels `[1.0, 0.0]` and `[0.0, 1.0]`, respectively.
 
-        3. **Normalización**:
-            - La pérdida original se divide por la suma de las pérdidas teóricas, obteniendo así una versión normalizada de la pérdida.
+        3. **Normalization**:
+            - The original loss is divided by the sum of the theoretical losses, resulting in a normalized version of the loss.
 
-        Ejemplo de Uso:
-        ---------------
-        ```python
-        # Definir la pérdida en el modelo
-        model.compile(optimizer='adam', loss=NormalizedBinaryCrossentropy())
-        ```
-
-        Notas:
-        ------
-        - Esta pérdida es útil en casos donde se desea mitigar el impacto de clases desbalanceadas, ya que la normalización ajusta la magnitud de la pérdida en función de las predicciones teóricas.
-        - La normalización ayuda a hacer que el aprendizaje sea más estable y menos sensible a predicciones con alta confianza errónea.
         """
 
         # Obtener el tamaño del lote
@@ -589,73 +558,62 @@ class GMRRNet:
         alpha=2,
     ):
         """
-        Construye un modelo de red neuronal convolucional basado en bloques de Inception con capas de convolución y cálculo de entropía de Renyi.
+        Builds a convolutional neural network model based on Inception blocks with convolutional layers and Rényi entropy computation.
 
-        Parámetros:
+        Parameters:
         -----------
-        nb_classes : int, opcional (default=2)
-            Número de clases de salida para la clasificación.
+        nb_classes : int, optional (default=2)
+            Number of output classes for classification.
 
-        Chans : int, opcional (default=64)
-            Número de canales de entrada (dimensión espacial).
+        Chans : int, optional (default=64)
+            Number of input channels (spatial dimension).
 
-        Samples : int, opcional (default=320)
-            Número de muestras de entrada (dimensión temporal).
+        Samples : int, optional (default=320)
+            Number of input samples (temporal dimension).
 
-        kernLength : int, opcional (default=64)
-            Longitud del kernel para la primera capa convolucional.
+        kernLength : int, optional (default=64)
+            Kernel length for the first convolutional layer.
 
-        norm_rate : float, opcional (default=0.25)
-            Tasa de normalización para la regularización en capas densas.
+        norm_rate : float, optional (default=0.25)
+            Normalization rate for regularization in dense layers.
 
-        alpha : int, opcional (default=2)
-            Parámetro de orden para la entropía de Renyi, donde alpha=2 representa la entropía de Renyi cuadrática.
+        alpha : int, optional (default=2)
+            Order parameter for Rényi entropy, where alpha=2 represents quadratic Rényi entropy.
 
-        Retorna:
+        Returns:
         --------
         model : tf.keras.Model
-            El modelo de red neuronal compilado listo para ser entrenado.
+            The compiled neural network model ready for training.
 
-        Descripción:
+        Description:
         ------------
-        Esta función crea y compila un modelo de red neuronal convolucional con las siguientes características:
+        This function creates and compiles a convolutional neural network model with the following features:
 
-        1. **Entrada**:
-            - La entrada es un tensor de 4D de forma `(Chans, Samples, 1)`, donde `Chans` es el número de canales (dimensión espacial) y `Samples` es el número de muestras (dimensión temporal).
+        1. **Input**:
+            - The input is a 4D tensor with shape `(Chans, Samples, 1)`, where `Chans` is the number of channels (spatial dimension) and `Samples` is the number of samples (temporal dimension).
 
-        2. **Primera Capa Convolucional**:
-            - Una capa convolucional `Conv2D` con `F1=3` filtros y un kernel de longitud `kernLength=64`.
+        2. **First Convolutional Layer**:
+            - A `Conv2D` layer with `F1=3` filters and a kernel of length `kernLength=64`.
 
-        3. **Bloque de Inception**:
-            - Un bloque de Inception personalizado que aplica un filtro gaussiano con diferentes sigmas y pasa los resultados a una convolución `Conv2D`.
-            - Se utilizan tres sigmas diferentes: `sigma1=0.8`, `sigma2=2.2`, y `sigma3=4.8`.
-            - Se aplican tres convoluciones `Conv2D` con `F2=5` filtros cada una y se concatenan sus salidas.
+        3. **Inception Block**:
+            - A custom Inception block that applies a Gaussian filter with different sigmas and passes the results to a `Conv2D`.
+            - Three different sigmas are used: `sigma1=0.8`, `sigma2=2.2`, and `sigma3=4.8`.
+            - Three `Conv2D` layers are applied with `F2=5` filters each, and their outputs are concatenated.
 
-        4. **Cálculo de la Entropía de Renyi**:
-            - Las salidas de las capas de kernel gaussiano del bloque de Inception se concatenan y se calcula la entropía de Renyi marginal y conjunta usando la función `renyi_entropy` y `joint_renyi_entropy`, respectivamente.
+        4. **Rényi Entropy Calculation**:
+            - The outputs of the Gaussian kernel layers from the Inception block are concatenated, and the marginal and joint Rényi entropy are computed using the `renyi_entropy` and `joint_renyi_entropy` functions, respectively.
 
-        5. **Capas Finales**:
-            - Se añade otra capa convolucional `Conv2D` con `F3=3` filtros seguida de una capa de normalización por lotes (`BatchNormalization`), aplanamiento (`Flatten`), y dos capas densas con una función de activación `softmax` para la salida final.
+        5. **Final Layers**:
+            - Another `Conv2D` layer with `F3=3` filters is added, followed by batch normalization (`BatchNormalization`), flattening (`Flatten`), and two dense layers with a `softmax` activation function for the final output.
 
-        6. **Compilación del Modelo**:
-            - El modelo se compila con el optimizador `Adam`.
-            - Se utiliza una combinación de dos funciones de pérdida:
-                1. `NormalizedBinaryCrossentropy`: Una pérdida normalizada de entropía cruzada binaria.
-                2. `RenyiMutualInformation`: Una pérdida basada en la información mutua de Renyi entre las entropías calculadas.
-            - Las pérdidas se ponderan con `loss_weights=[0.8, 0.2]`.
-
-        Ejemplo de Uso:
-        ---------------
-        ```python
-        model = KernelConvInceptionMI(nb_classes=2, Chans=64, Samples=320, kernLength=64, norm_rate=0.25, alpha=2)
-        model.summary()
-        ```
-
-        Notas:
-        ------
-        - Este modelo es adecuado para tareas de clasificación binaria o multi-clase donde es importante capturar relaciones complejas entre características utilizando bloques de Inception.
-        - La inclusión de la entropía de Renyi como una medida adicional puede mejorar la robustez del modelo en escenarios con incertidumbre.
+        6. **Model Compilation**:
+            - The model is compiled with the `Adam` optimizer.
+            - A combination of two loss functions is used:
+                1. `NormalizedBinaryCrossentropy`: A normalized binary cross-entropy loss.
+                2. `RenyiMutualInformation`: A loss based on Rényi mutual information between the calculated entropies.
+            - The losses are weighted with `loss_weights=[0.8, 0.2]`.
         """
+
 
         ###### Definición de los filtros para las capas convolucionales
         F1 = 3
