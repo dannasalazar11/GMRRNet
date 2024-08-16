@@ -249,27 +249,7 @@ class GaussianKernelLayer(Layer):
     sigma : float, optional (default=1.0)
         Standard deviation of the Gaussian kernel function. Controls the range or "spread" of the Gaussian.
 
-    Methods:
-    --------
-    build(input_shape):
-        Build method that initializes the internal components of the layer based on the shape of the input.
 
-    call(inputs):
-        Method that applies the layer's transformation to the inputs.
-
-        Parameters:
-        -----------
-        inputs : Tensor
-            Input tensor with shape `(N, C, T, F)` where:
-            - N: Number of samples in the batch.
-            - C: Number of channels or features.
-            - T: Number of time steps.
-            - F: Number of filters.
-
-        Returns:
-        --------
-        gaussian_kernel : Tensor
-            Tensor with the same shape as the input tensor, where each entry has been transformed by the Gaussian kernel.
     """
 
 
