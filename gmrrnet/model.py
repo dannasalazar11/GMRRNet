@@ -50,16 +50,6 @@ def renyi_entropy(K, alpha=2):
         - If `alpha=2`, an optimization is used that computes the trace of the matrix product of `X` with itself.
         - For other values of `alpha`, the eigenvalues of `X` are computed, and the general formula for Rényi entropy is applied.
 
-    Usage Example:
-    --------------
-    ```python
-    # Create a sample tensor with shape (N, F, C, C)
-    K = tf.random.normal((32, 10, 64, 64))
-
-    # Calculate the Rényi entropy with alpha = 2
-    entropy = renyi_entropy(K, alpha=2)
-    print(entropy.shape)  # Output: (32, 10)
-
     """
 
     # Obtener el número de canales
@@ -410,13 +400,6 @@ class RenyiMutualInformation(Loss):
 
         4. **Calculation of Rényi Mutual Information**:
             - The sum of the marginal entropies is computed, the joint entropy is subtracted, and the result is normalized by `F * log_C` to obtain the normalized Rényi mutual information.
-
-        Usage Example:
-        ---------------
-        ```python
-        # Define the loss in the model
-        model.compile(optimizer='adam', loss=[NormalizedBinaryCrossentropy(), RenyiMutualInformation(C=64)], loss_weights=[0.8, 0.2])
-        ```
 
         Notes:
         ------
