@@ -36,4 +36,5 @@ dev = [
     "IPython",
     "pandas",
     "scikit-learn",
+    "gcpds-visualizations @ git+https://github.com/UN-GCPDS/python-gcpds.visualizations.git",
     ]

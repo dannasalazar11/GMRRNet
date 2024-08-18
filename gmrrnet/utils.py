@@ -3,7 +3,37 @@ from typing import Tuple, Sequence
 import numpy as np
 from scipy.signal import butter as bw, filtfilt, resample
 from sklearn.base import BaseEstimator, TransformerMixin
+import matplotlib.pyplot as plt
+import mne
+from gcpds.visualizations.connectivities import CircosConnectivity
 
+def plot_circos(connectivities, eeg_ch_names, areas, threshold=0.6):
+    """
+    input
+    connectivities: tensorflow square array
+    """
+    conn = CircosConnectivity(connectivities.numpy(), eeg_ch_names, areas=areas, threshold=threshold,
+    # cmaps and themes
+    areas_cmap='Set3',
+    arcs_cmap='Wistia',
+    hemisphere_color='lightgray',
+    channel_color='#f8f9fa',
+    min_alpha=0,
+    # Texts
+    width={'hemispheres':35, 'areas':100, 'channels':60},
+    text={'hemispheres':40, 'areas':20,  'channels':40},
+    separation={'hemispheres':10, 'areas':-30, 'channels':5},
+    labelposition={'hemispheres':60, 'areas':0, 'channels':-10},
+    size=5,
+    labelsize=6,
+    # Shapes
+    show_emisphere=True,
+    arcs_separation=30,
+    connection_width=0.1,
+    small_separation=5,
+    big_separation=10,
+    offset=0,
+    )
 
 def load_GIGA(
     db,
@@ -122,6 +152,41 @@ def butterworth_digital_filter(
         irlen=irlen,
     )
 
+def topoplot(data, channels, montage_name='standard_1020', ax=None, contours=None, colorbar=True, **kwargs):
+    """
+    Plots a topomap of EEG data.
+    Parameters:
+    data: array-like
+        The data values for each channel.
+    channels: list of str
+        The names of the EEG channels.
+    montage_name: str
+        The name of the montage to use for the topomap. Default is 'standard_1020'.
+    ax: matplotlib.axes.Axes
+        The axes object to plot the topomap on. If None, a new axes will be created.
+    contours: int or array-like
+        The number of contour levels to draw, or the specific levels to draw.
+    **kwargs: dict
+        Additional keyword arguments to pass to mne.viz.plot_topomap.
+    Returns:
+    im: matplotlib.image.AxesImage
+        The image object created by mne.viz.plot_topomap.
+    """
+    info = mne.create_info(channels, sfreq=1, ch_types="eeg")
+    info.set_montage(montage_name)
+
+    if ax is None:
+        fig, ax = plt.subplots()
+    else:
+        fig = ax.figure
+
+    im, _ = mne.viz.plot_topomap(data, info, axes=ax, contours=contours, show=False, **kwargs)
+
+    if colorbar:
+    # Add the colorbar
+        fig.colorbar(im, ax=ax)
+
+    return im
 
 class TimeFrequencyRpr(BaseEstimator, TransformerMixin):
     """
