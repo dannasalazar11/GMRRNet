@@ -6,3 +6,4 @@ nbsphinx
 sphinxcontrib-bibtex
 pygments
 dunderlab-docs
+gcpds-visualizations @ git+https://github.com/UN-GCPDS/python-gcpds.visualizations.git
