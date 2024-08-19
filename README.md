@@ -51,6 +51,8 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 ```
 
+
+```python
 kernel1 = tf.keras.Model(inputs=model.inputs,outputs=model.get_layer('gaussian_layer_1').output) 
 kernel2 = tf.keras.Model(inputs=model.inputs,outputs=model.get_layer('gaussian_layer_2').output) 
 kernel3 = tf.keras.Model(inputs=model.inputs,outputs=model.get_layer('gaussian_layer_3').output)
@@ -78,6 +80,7 @@ X_k3 = tf.reduce_mean(X_k3, axis=-1) # promedio por filtros
 
 X_k3_left = tf.reduce_mean(tf.gather(X_k3, idx_left), axis=0) # promedio de clase izq
 X_k3_right = tf.reduce_mean(tf.gather(X_k3, idx_right), axis=0) # promedio de clase der
+```
 
 
 ```python

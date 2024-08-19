@@ -56,45 +56,35 @@ Topoplots
     import tensorflow as tf
     import matplotlib.pyplot as plt
 
-kernel1 =
-tf.keras.Model(inputs=model.inputs,outputs=model.get_layer(‘gaussian_layer_1’).output)
-kernel2 =
-tf.keras.Model(inputs=model.inputs,outputs=model.get_layer(‘gaussian_layer_2’).output)
-kernel3 =
-tf.keras.Model(inputs=model.inputs,outputs=model.get_layer(‘gaussian_layer_3’).output)
+.. code:: ipython3
 
-idx_left = tf.squeeze(tf.where(np.argmax(y_train, axis=1)==0)) idx_right
-= tf.squeeze(tf.where(np.argmax(y_train, axis=1)==1))
-
-kernel 1
-~~~~~~~~
-
-X_k1 = kernel1.predict(tf.expand_dims(X_train[0], axis=0)) X_k1 =
-tf.reduce_mean(X_k1, axis=-1) # promedio por filtros
-
-X_k1_left = tf.reduce_mean(tf.gather(X_k1, idx_left), axis=0) # promedio
-de clase izq X_k1_right = tf.reduce_mean(tf.gather(X_k1, idx_right),
-axis=0) # promedio de clase der
-
-Kernel 2
-~~~~~~~~
-
-X_k2 = kernel2.predict(X_train) X_k2 = tf.reduce_mean(X_k2, axis=-1) #
-promedio por filtros
-
-X_k2_left = tf.reduce_mean(tf.gather(X_k2, idx_left), axis=0) # promedio
-de clase izq X_k2_right = tf.reduce_mean(tf.gather(X_k2, idx_right),
-axis=0) # promedio de clase der
-
-Kernel 3
-~~~~~~~~
-
-X_k3 = kernel3.predict(X_train) X_k3 = tf.reduce_mean(X_k3, axis=-1) #
-promedio por filtros
-
-X_k3_left = tf.reduce_mean(tf.gather(X_k3, idx_left), axis=0) # promedio
-de clase izq X_k3_right = tf.reduce_mean(tf.gather(X_k3, idx_right),
-axis=0) # promedio de clase der
+    kernel1 = tf.keras.Model(inputs=model.inputs,outputs=model.get_layer('gaussian_layer_1').output) 
+    kernel2 = tf.keras.Model(inputs=model.inputs,outputs=model.get_layer('gaussian_layer_2').output) 
+    kernel3 = tf.keras.Model(inputs=model.inputs,outputs=model.get_layer('gaussian_layer_3').output)
+    
+    idx_left = tf.squeeze(tf.where(np.argmax(y_train, axis=1)==0))
+    idx_right = tf.squeeze(tf.where(np.argmax(y_train, axis=1)==1))
+    
+    ### kernel 1
+    X_k1 = kernel1.predict(tf.expand_dims(X_train[0], axis=0))
+    X_k1 = tf.reduce_mean(X_k1, axis=-1) # promedio por filtros
+    
+    X_k1_left = tf.reduce_mean(tf.gather(X_k1, idx_left), axis=0) # promedio de clase izq
+    X_k1_right = tf.reduce_mean(tf.gather(X_k1, idx_right), axis=0) # promedio de clase der
+    
+    ### Kernel 2
+    X_k2 = kernel2.predict(X_train)
+    X_k2 = tf.reduce_mean(X_k2, axis=-1) # promedio por filtros
+    
+    X_k2_left = tf.reduce_mean(tf.gather(X_k2, idx_left), axis=0) # promedio de clase izq
+    X_k2_right = tf.reduce_mean(tf.gather(X_k2, idx_right), axis=0) # promedio de clase der
+    
+    ### Kernel 3
+    X_k3 = kernel3.predict(X_train)
+    X_k3 = tf.reduce_mean(X_k3, axis=-1) # promedio por filtros
+    
+    X_k3_left = tf.reduce_mean(tf.gather(X_k3, idx_left), axis=0) # promedio de clase izq
+    X_k3_right = tf.reduce_mean(tf.gather(X_k3, idx_right), axis=0) # promedio de clase der
 
 .. code:: ipython3
 
