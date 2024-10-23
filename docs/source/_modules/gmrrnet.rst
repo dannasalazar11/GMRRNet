@@ -1,5 +1,5 @@
-
-
+gmrrnet package
+===============
 
 .. automodule:: gmrrnet
    :members:
