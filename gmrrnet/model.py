@@ -505,7 +505,9 @@ class NormalizedBinaryCrossentropy(Loss):
 
         return cce_norm
 
-
+class TransposeLayer(Layer):
+    def call(self, x):
+        return tf.transpose(x, perm = (0,3,1,2))
 ########################################################################
 class GMRRNet:
     """"""
@@ -614,9 +616,8 @@ class GMRRNet:
         concatenated_branches = concatenate(
             [branch_k1, branch_k2, branch_k3], axis=-1
         )
-        concatenated_branches = tf.transpose(
-            concatenated_branches, perm=(0, 3, 1, 2)
-        )
+        concatenated_branches = TransposeLayer()(concatenated_branches)
+        
         layer_entropy = Lambda(
             lambda x: renyi_entropy(x, alpha=alpha), name="entropy"
         )(concatenated_branches)
